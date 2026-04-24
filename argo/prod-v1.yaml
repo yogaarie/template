@@ -12,7 +12,7 @@ spec:
     namespace: default
   sources:
     - repoURL: https://github.com/yogaarie/template.git
-      path: my-chart
+      path: chart-helm
       targetRevision: HEAD
       helm:
         valueFiles:
