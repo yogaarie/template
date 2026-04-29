@@ -6,7 +6,7 @@ image:
 imagePullSecrets:
   - name: secret
 nameOverride: ''
-fullnameOverride: ''
+fullnameOverride: apps-example-v1
 serviceAccount:
   create: true
   automount: true
