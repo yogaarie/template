@@ -51,6 +51,7 @@ stage('Checkout') {
                         sh """
                            yq -i -y '.image.repository = "${REGISTRY}/${APP_NAME}"' ${valuesPath}
                            yq -i -y '.image.tag = "${params.branch}"' ${valuesPath}
+                           yq -i -y '.fullnameOverride = "${APP_NAME}"' ${valuesPath}
                         """
                         
                         // Git commit and push
