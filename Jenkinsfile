@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Registry credentials ID in Jenkins (create one if you haven't)
-        REGISTRY_CREDS = 'your-registry-creds-id' 
+        REGISTRY_CREDS = 'nexus' 
         REGISTRY       = "192.168.56.10:5000"
         APP_NAME       = "apps-example-v1"
         INFRA_REPO     = "https://github.com/yogaarie/template.git"
@@ -11,21 +11,28 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                // Check out App Repo
-                checkout scm
-                // Check out Infra Repo
-                dir('infra-templates') {
-                    git branch: 'master', credentialsId: "${GIT_CREDS}", url: "${INFRA_REPO}"
-                }
+stage('Checkout') {
+    steps {
+        script {
+            // Manual Clone for App
+            git branch: 'main', 
+                credentialsId: "${CREDENTIALS_ID}", 
+                url: "https://github.com/yogaarie/${APP_NAME}.git"
+
+            // Manual Clone for Infra
+            dir('infra-templates') {
+                git branch: 'master', 
+                    credentialsId: "${CREDENTIALS_ID}", 
+                    url: "${INFRA_REPO_URL}"
             }
         }
+    }
+}
 
         stage('Build & Push') {
             steps {
                 script {
-                    docker.withRegistry("https://${REGISTRY}", "${REGISTRY_CREDS}") {
+                    docker.withRegistry("http://${REGISTRY}", "${REGISTRY_CREDS}") {
                         // Builds and tags based on the branch parameter
                         def customImage = docker.build("${APP_NAME}:${params.branch}")
                         customImage.push()
