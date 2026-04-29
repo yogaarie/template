@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_TAG   = ""
+        IMAGE_TAG   = "${params.branch}"
         FULL_IMAGE  = ""
         REGISTRY    = "192.168.56.10:5000"
         APP_NAME    = "apps-example-v1"
@@ -27,7 +27,6 @@ pipeline {
                     }
 
                     // 3. Generate the tag from the App Repo (current directory)
-                    IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     FULL_IMAGE = "${REGISTRY}/test/${APP_NAME}:${IMAGE_TAG}"
                     
                     echo "Target Image: ${FULL_IMAGE}"
