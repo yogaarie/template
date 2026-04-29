@@ -2,11 +2,11 @@ replicaCount: 1
 image:
   repository: 192.168.56.10:5000/apps-example-v1
   pullPolicy: IfNotPresent
-  tag: v3.0.0
+  tag: v2.0.0
 imagePullSecrets:
   - name: secret
 nameOverride: ''
-fullnameOverride: apps-example-v1-v3.0.0
+fullnameOverride: apps-example-v1-v2.0.0
 serviceAccount:
   create: true
   automount: true
