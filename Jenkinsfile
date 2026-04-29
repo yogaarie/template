@@ -49,8 +49,8 @@ stage('Checkout') {
                         
                         // Use yq to update values safely
                         sh """
-                           yq -i '.image.repository = "${REGISTRY}/${APP_NAME}"' ${valuesPath}
-                           yq -i '.image.tag = "${params.branch}"' ${valuesPath}
+                           yq -i -y '.image.repository = "${REGISTRY}/${APP_NAME}"' ${valuesPath}
+                           yq -i -y '.image.tag = "${params.branch}"' ${valuesPath}
                         """
                         
                         // Git commit and push
