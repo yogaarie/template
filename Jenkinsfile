@@ -2,82 +2,75 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_TAG   = "${params.branch}"
-        FULL_IMAGE  = ""
-        REGISTRY    = "192.168.56.10:5000"
-        APP_NAME    = "apps-example-v1"
-        INFRA_REPO_URL = "https://github.com/yogaarie/template.git"
-        CREDENTIALS_ID = "yogaarie"
+        // Registry credentials ID in Jenkins (create one if you haven't)
+        REGISTRY_CREDS = 'your-registry-creds-id' 
+        REGISTRY       = "192.168.56.10:5000"
+        APP_NAME       = "apps-example-v1"
+        INFRA_REPO     = "https://github.com/yogaarie/template.git"
+        GIT_CREDS      = "yogaarie"
     }
 
     stages {
-        stage('Setup & Checkout') {
+        stage('Checkout') {
             steps {
-                script {
-                    // 1. Clone Application Repo (into the root workspace)
-                    git branch: 'main', 
-                        credentialsId: "${CREDENTIALS_ID}", 
-                        url: "https://github.com/yogaarie/${APP_NAME}.git"
-                    
-                    // 2. Clone Infrastructure/Template Repo (into a specific folder)
-                    dir('infra-templates') {
-                        git branch: 'master', 
-                            credentialsId: "${CREDENTIALS_ID}", 
-                            url: "${INFRA_REPO_URL}"
-                    }
-
-                    // 3. Generate the tag from the App Repo (current directory)
-                    FULL_IMAGE = "${REGISTRY}/${APP_NAME}:${IMAGE_TAG}"
-                    
-                    echo "Target Image: ${FULL_IMAGE}"
+                // Check out App Repo
+                checkout scm
+                // Check out Infra Repo
+                dir('infra-templates') {
+                    git branch: 'master', credentialsId: "${GIT_CREDS}", url: "${INFRA_REPO}"
                 }
             }
         }
 
-        stage('Build & Push Docker') {
+        stage('Build & Push') {
             steps {
-                // Docker build runs in the root workspace where the App Dockerfile is
-                sh "docker build -t ${FULL_IMAGE} ."
-                sh "docker push ${FULL_IMAGE}"
+                script {
+                    docker.withRegistry("https://${REGISTRY}", "${REGISTRY_CREDS}") {
+                        // Builds and tags based on the branch parameter
+                        def customImage = docker.build("${APP_NAME}:${params.branch}")
+                        customImage.push()
+                    }
+                }
             }
         }
 
-        stage('Update & Push Manifest') {
+        stage('Update Manifests') {
             steps {
-                // Move back into the infra folder cloned in stage 1
                 dir('infra-templates') {
                     script {
                         def valuesPath = "chart-helm/values.yaml"
                         
-                        // Update the tag
-                        sh "sed -i 's|^\\s*repository: .*|  repository: \"${REGISTRY}/${APP_NAME}\"|' ${valuesPath}"
-                        sh "sed -i 's/^\\s*tag: .*/  tag: \"${IMAGE_TAG}\"/' ${valuesPath}"
-                        
-                        // Git config and commit
+                        // Use yq to update values safely
                         sh """
-                            git config user.email "yogaarir@gmail.com"
-                            git config user.name "yoga"
-                            git add ${valuesPath}
-                            git commit -m "chore: update image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes"
+                           yq -i '.image.repository = "${REGISTRY}/${APP_NAME}"' ${valuesPath}
+                           yq -i '.image.tag = "${params.branch}"' ${valuesPath}
                         """
                         
-                        // Secure Push using token from credentials
-                        withCredentials([usernamePassword(
-                            credentialsId: "${CREDENTIALS_ID}", 
-                            passwordVariable: 'GIT_PASSWORD', 
-                            usernameVariable: 'GIT_USERNAME'
-                        )]) {
-                            sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/yogaarie/template.git master'
+                        // Git commit and push
+                        withCredentials([usernamePassword(credentialsId: "${GIT_CREDS}", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                            sh """
+                                git config user.email "yogaarir@gmail.com"
+                                git config user.name "yoga"
+                                git add ${valuesPath}
+                                git commit -m "chore: update image tag to ${params.branch} [skip ci]" || echo "No changes to commit"
+                                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/yogaarie/template.git master
+                            """
                         }
                     }
                 }
+            }
+        }
+
+        stage('Apply Argo') {
+            steps {
+                sh 'kubectl apply -f infra-templates/argo/prod-v1.yaml'
             }
         }
     }
 
     post {
         always {
-            cleanWs(notFailBuild: true)
+            cleanWs()
         }
     }
 }
