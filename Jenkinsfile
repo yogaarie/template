@@ -6,7 +6,7 @@ pipeline {
         REGISTRY_CREDS = 'nexus' 
         REGISTRY       = "192.168.56.10:5000"
         APP_NAME       = "apps-example-v1"
-        INFRA_REPO_URL     = "https://github.com/yogaarie/template.git"
+        INFRA_REPO_URL = "https://github.com/yogaarie/template.git"
         GIT_CREDS      = "yogaarie"
     }
 
