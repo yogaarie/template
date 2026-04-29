@@ -1,0 +1,5 @@
+{
+    "appname": "apps-example-v1",
+    "env": "prod",
+    "namespace": "payment",
+  }

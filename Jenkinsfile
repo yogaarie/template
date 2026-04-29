@@ -10,7 +10,7 @@ pipeline {
         GIT_CREDS      = "yogaarie"
     }
 
-    stages {
+stages {
 stage('Checkout') {
     steps {
         script {

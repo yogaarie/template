@@ -4,27 +4,29 @@ metadata:
   name: apps-example-generator
   namespace: argocd
 spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
-    - list:
-        elements:
-          - appname: apps-example-v1
-            env: prod
-            namespace: payment
+  - git:
+      repoURL: https://github.com/yogaarie/template.git
+      revision: HEAD
+      files:
+      - path: "argo/env-config/**/config.json"    
   template:
     metadata:
-      name: '{{appname}}'
+      name: '{{.appname}}'
     spec:
       project: default
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
+        namespace: '{{.namespace}}'
       sources:
         - repoURL: https://github.com/yogaarie/template.git
           path: template-helm
           targetRevision: HEAD
           helm:
             valueFiles:
-              - '$values/chart-helm/{{appname}}.yaml' # Parameterized file name
+              - '$values/chart-helm/{{.appname}}.yaml' # Parameterized file name
         - repoURL: 'https://github.com/yogaarie/template.git'
           targetRevision: HEAD
           ref: values
