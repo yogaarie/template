@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps-example-generator
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - appname: apps-example-v1
+            env: prod
+  template:
+    metadata:
+      name: '{{appname}}'
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{appname}}-ns'
+      sources:
+        - repoURL: https://github.com/yogaarie/template.git
+          path: template-helm
+          targetRevision: HEAD
+          helm:
+            valueFiles:
+              - '$values/chart-helm/{{appname}}.yaml' # Parameterized file name
+        - repoURL: 'https://github.com/yogaarie/template.git'
+          targetRevision: HEAD
+          ref: values
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
