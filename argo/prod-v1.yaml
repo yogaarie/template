@@ -16,7 +16,7 @@ spec:
     metadata:
       name: '{{.appname}}'
     spec:
-      project: default
+      project: '{{.project}}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{.namespace}}'
