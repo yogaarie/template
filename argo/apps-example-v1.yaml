@@ -9,6 +9,7 @@ spec:
         elements:
           - appname: apps-example-v1
             env: prod
+            namespace: payment
   template:
     metadata:
       name: '{{appname}}'
@@ -16,7 +17,7 @@ spec:
       project: default
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{appname}}-ns'
+        namespace: '{{namespace}}'
       sources:
         - repoURL: https://github.com/yogaarie/template.git
           path: template-helm

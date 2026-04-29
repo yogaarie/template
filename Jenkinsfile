@@ -45,7 +45,7 @@ stage('Checkout') {
             steps {
                 dir('infra-templates') {
                     script {
-                        def valuesPath = "chart-helm/values.yaml"
+                        def valuesPath = "chart-helm/${APP_NAME}.yaml"
                         
                         // Use yq to update values safely
                         sh """
