@@ -71,7 +71,7 @@ stage('Checkout') {
 
         stage('Apply Argo') {
             steps {
-                sh "jq '.appname = \"${apps-example-v1}-${params.branch}\"' config.json > temp.json && mv temp.json config.json"
+                sh "jq '.appname = \"${APP_NAME}-${params.branch}\"' config.json > temp.json && mv temp.json config.json"
                 sh 'kubectl apply -f infra-templates/argo/prod-v1.yaml'
             }
         }
