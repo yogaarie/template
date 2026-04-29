@@ -50,7 +50,7 @@ pipeline {
                         def valuesPath = "chart-helm/values.yaml"
                         
                         // Update the tag
-                        sh "sed -i 's/^\\s*repository: .*/  repository: \"${FULL_IMAGE}\"/' ${valuesPath}"
+                        sh "sed -i 's/^\\s*repository: .*/  repository: \"${REGISTRY}/${APP_NAME}\"/' ${valuesPath}"
                         sh "sed -i 's/^\\s*tag: .*/  tag: \"${IMAGE_TAG}\"/' ${valuesPath}"
                         
                         // Git config and commit
