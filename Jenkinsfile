@@ -27,7 +27,7 @@ pipeline {
                     }
 
                     // 3. Generate the tag from the App Repo (current directory)
-                    FULL_IMAGE = "${REGISTRY}/test/${APP_NAME}:${IMAGE_TAG}"
+                    FULL_IMAGE = "${REGISTRY}/${APP_NAME}:${IMAGE_TAG}"
                     
                     echo "Target Image: ${FULL_IMAGE}"
                 }
