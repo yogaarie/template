@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # Nama ini HARUS sama dengan 'previewService' di rollout.yaml
+  name: {{ include "apps-cicd.fullname" . }}-preview
+  labels:
+    {{- include "apps-cicd.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    # Saat deployment baru dimulai, Argo akan mengarahkan service ini ke Pod baru
+    {{- include "apps-cicd.selectorLabels" . | nindent 4 }}
