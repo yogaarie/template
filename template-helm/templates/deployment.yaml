@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1  # Changed from apps/v1
+kind: Rollout                     # Changed from Deployment
 metadata:
   name: {{ include "apps-cicd.fullname" . }}
   labels:
@@ -11,6 +11,18 @@ spec:
   selector:
     matchLabels:
       {{- include "apps-cicd.selectorLabels" . | nindent 6 }}
+  
+  # --- NEW STRATEGY BLOCK ---
+  strategy:
+    blueGreen: 
+      # The 'active' service should be your main production service
+      activeService: {{ include "apps-cicd.fullname" . }}
+      # The 'preview' service is for testing the new version before swap
+      previewService: {{ include "apps-cicd.fullname" . }}-preview
+      # Set to false if you want Jenkins or a human to approve the swap
+      autoPromotionEnabled: false 
+  # ---------------------------
+
   template:
     metadata:
       {{- with .Values.podAnnotations }}
