@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: 192.168.56.10:5000/apps-example-v1
   pullPolicy: IfNotPresent
-  tag: v3.0.0
+  tag: v4.0.0
 imagePullSecrets:
   - name: secret
 nameOverride: ''
